@@ -46,6 +46,8 @@ It is being used as a Windows endpoint for administration, firewall configuratio
 
 ## Network Architecture
 
+![Cybersecurity Home Lab Network Topology] diagrams/Home lab topology Image Aug 31, 2026, 05_57_36 PM.png
+
 The lab uses a VirtualBox Internal Network named:
 
 `CYBER-LAB`
@@ -54,7 +56,7 @@ Lab subnet:
 
 `192.168.50.0/24`
 
-Current topology:diagrams/Home lab topology Image Aug 31, 2026, 05_57_36 PM.png
+Current topology:
 
 Ubuntu-Lab (`192.168.50.10`) <--> CYBER-LAB <--> Windows-Lab (`192.168.50.20`)
 

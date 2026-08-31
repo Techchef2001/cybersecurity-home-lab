@@ -62,8 +62,7 @@ Ubuntu-Lab also has a separate NAT interface that provides Internet access.
 
 Windows-Lab does not currently have Internet access and remains isolated inside the lab network.
 
-![Cybersecurity Home Lab Network Topology](diagrams/Home lab topology.png)
-
+![Cybersecurity Home Lab Network Topology]diagrams/Home lab topology Image Aug 31, 2026, 05_57_36 PM.png
 ## Skills Practiced So Far
 
 - VirtualBox virtual machine configuration

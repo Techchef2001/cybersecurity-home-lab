@@ -302,3 +302,219 @@ This lab helped me understand several concepts:
 The next experiment will continue investigating TCP port states by creating a temporary controlled listener and observing how Nmap's results change.
 
 Future stages of the home lab will also include Windows/Linux administration, logging, Active Directory, SIEM monitoring, detection, and controlled attack-and-defense exercises.
+
+
+---
+
+## 8. Temporary TCP Listener Experiment
+
+### Objective
+
+The purpose of this experiment was to investigate how the state of a TCP port changes depending on whether an application is actively listening on that port.
+
+Earlier, I created a Windows Defender Firewall inbound rule allowing Ubuntu-Lab (`192.168.50.10`) to communicate with Windows-Lab on TCP port `12345`.
+
+The firewall rule was configured as:
+
+```text
+Direction:      Inbound
+Action:         Allow
+Protocol:       TCP
+Local Port:     12345
+Remote Address: 192.168.50.10
+Profile:        Any
+```
+
+Despite the firewall rule, Nmap continued to report TCP port 12345 as filtered.
+
+---
+
+### Test 1 - No TCP Listener
+
+From Ubuntu-Lab, I scanned Windows-Lab:
+
+```bash
+nmap -Pn -p 12345 192.168.50.20
+```
+
+The result was:
+
+```text
+PORT      STATE     SERVICE
+12345/tcp filtered  netbus
+```
+
+At this point, the firewall rule existed, but no application was listening on TCP port 12345.
+
+I verified this from Windows-Lab using PowerShell:
+
+```powershell
+Get-NetTCPConnection -LocalPort 12345 -ErrorAction SilentlyContinue
+```
+
+No listening connection was returned.
+
+---
+
+### Test 2 - Start a Temporary TCP Listener
+
+To test whether an actively listening application would change the Nmap result, I created a temporary TCP listener using PowerShell.
+
+```powershell
+$listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Any, 12345)
+$listener.Start()
+```
+
+I then verified that Windows was listening on the port:
+
+```powershell
+Get-NetTCPConnection -LocalPort 12345 -State Listen
+```
+
+The listener was now active on TCP port 12345.
+
+---
+
+### Test 3 - Scan While the Listener Is Running
+
+With the PowerShell listener running, I returned to Ubuntu-Lab and repeated the same Nmap scan:
+
+```bash
+nmap -Pn -p 12345 192.168.50.20
+```
+
+This time Nmap reported:
+
+```text
+PORT      STATE  SERVICE
+12345/tcp open   netbus
+```
+
+The port changed from:
+
+```text
+filtered
+```
+
+to:
+
+```text
+open
+```
+
+The firewall configuration had not changed between these two scans.
+
+The variable that changed was the presence of an application actively listening on TCP port 12345.
+
+---
+
+### Test 4 - Stop the TCP Listener
+
+I returned to Windows-Lab and stopped the temporary listener:
+
+```powershell
+$listener.Stop()
+```
+
+I verified that the listener was no longer active:
+
+```powershell
+Get-NetTCPConnection -LocalPort 12345 -State Listen -ErrorAction SilentlyContinue
+```
+
+No listening connection was returned.
+
+---
+
+### Test 5 - Final Nmap Scan
+
+I returned to Ubuntu-Lab and performed the same scan one final time:
+
+```bash
+nmap -Pn -p 12345 192.168.50.20
+```
+
+The port returned to:
+
+```text
+PORT      STATE     SERVICE
+12345/tcp filtered  netbus
+```
+
+The complete experiment therefore produced:
+
+```text
+No listener
+    |
+    v
+12345/tcp FILTERED
+    |
+    | Start PowerShell TCP listener
+    v
+12345/tcp OPEN
+    |
+    | Stop PowerShell TCP listener
+    v
+12345/tcp FILTERED
+```
+
+---
+
+## Analysis
+
+This experiment demonstrated that a firewall rule and a listening network service are separate components.
+
+Creating an inbound firewall rule did not itself create a network service on TCP port 12345.
+
+When the PowerShell TCP listener was started, an application began accepting TCP connections on that port. Because the existing firewall rule permitted traffic from Ubuntu-Lab, Nmap was then able to identify TCP port 12345 as open.
+
+Stopping the listener removed the application that was accepting connections, and the Nmap result returned to filtered.
+
+This experiment also demonstrated the value of changing one variable at a time during troubleshooting.
+
+The firewall configuration remained constant while the TCP listener was started and stopped. This made it possible to observe the relationship between the listening process and the externally observed Nmap port state.
+
+---
+
+## Important Note About the `netbus` Service Name
+
+Nmap displayed:
+
+```text
+12345/tcp open netbus
+```
+
+This does **not** mean that NetBus was installed or running on Windows-Lab.
+
+The actual listener was the temporary PowerShell/.NET TCP listener that I created.
+
+Nmap associates many port numbers with conventional or historically associated service names. Therefore, the service name displayed for a port should not automatically be treated as proof of the application actually running behind that port.
+
+This reinforced another important security-analysis principle:
+
+> Tool output should be interpreted as evidence and verified rather than automatically treated as fact.
+
+---
+
+## Key Takeaways
+
+- An inbound firewall rule does not create a listening network service.
+- A TCP port becomes open when an application is actively listening and the network path permits communication.
+- Windows Firewall can affect how Nmap classifies TCP ports.
+- Nmap port states describe what the scanner can observe from its position on the network.
+- Nmap service-name labels do not necessarily identify the application actually running on a port.
+- Local system information can be compared with external scan results during an investigation.
+- Changing one variable at a time makes troubleshooting results easier to interpret.
+- Reversing a change and repeating a test can help confirm cause and effect.
+
+---
+
+## Experiment Summary
+
+| Stage | Firewall Rule | TCP Listener | Nmap Result |
+|---|---|---|---|
+| Initial test | Allow | Not running | `filtered` |
+| Listener started | Allow | Running | `open` |
+| Listener stopped | Allow | Not running | `filtered` |
+
+This experiment provided a practical demonstration of the relationship between host firewall configuration, listening applications, TCP ports, and network reconnaissance.

@@ -46,7 +46,14 @@ It is being used as a Windows endpoint for administration, firewall configuratio
 
 ## Network Architecture
 
-![Cybersecurity Home Lab Network Topology](network-topology.png)
+
+
+
+![Cybersecurity Home Lab Network Topology](diagrams/network-topology.png)
+
+
+
+
 
 The lab uses a VirtualBox Internal Network named:
 

@@ -215,6 +215,8 @@ Wireshark also identified the corresponding response frame.
 
 
 
+
+
 The corresponding packet traveled in the opposite direction:
 
 ```text
@@ -294,6 +296,7 @@ Get-NetTCPConnection -LocalPort 12345 -State Listen
 
 *Figure 2: Wireshark capture showing TCP communication with port 12345 while the temporary listener was active.*
 With the temporary listener active, I started a Wireshark capture on `enp0s8`.
+
 
 
 
@@ -428,6 +431,7 @@ This helped demonstrate how a system can maintain multiple simultaneous network 
 ![TCP Port 12345 Filtered](../screenshots/tcp-12345-filtered.png)
 
 *Figure 3: Wireshark capture showing SYN probes sent to TCP port 12345 with no TCP response observed.*
+
 
 
 

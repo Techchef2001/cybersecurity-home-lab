@@ -200,6 +200,21 @@ Wireshark also identified the corresponding response frame.
 
 ## 5. Analyzing an ICMP Echo Reply
 
+
+
+
+
+### ICMP Echo Request and Reply Capture
+
+![ICMP Echo Request and Reply Capture](../screenshots/icmp-echo-capture.png)
+
+*Figure 1: Wireshark capture showing ICMP Echo Requests from Ubuntu-Lab and Echo Replies from Windows-Lab.*
+
+
+
+
+
+
 The corresponding packet traveled in the opposite direction:
 
 ```text
@@ -220,6 +235,7 @@ The request and reply therefore demonstrated:
 Type 8 = Echo Request
 Type 0 = Echo Reply
 ```
+
 
 ### TTL Observation
 
@@ -268,7 +284,21 @@ Get-NetTCPConnection -LocalPort 12345 -State Listen
 
 ## 7. Capturing an Open TCP Port
 
+
+
+
+
+### Open TCP Port Capture
+
+![TCP Port 12345 Open](../screenshots/tcp-12345-open.png)
+
+*Figure 2: Wireshark capture showing TCP communication with port 12345 while the temporary listener was active.*
 With the temporary listener active, I started a Wireshark capture on `enp0s8`.
+
+
+
+
+
 
 From Ubuntu-Lab, I performed the following scan:
 
@@ -388,6 +418,20 @@ This helped demonstrate how a system can maintain multiple simultaneous network 
 ---
 
 ## 11. Capturing a Filtered TCP Port
+
+
+
+
+
+### Filtered TCP Port Capture
+
+![TCP Port 12345 Filtered](../screenshots/tcp-12345-filtered.png)
+
+*Figure 3: Wireshark capture showing SYN probes sent to TCP port 12345 with no TCP response observed.*
+
+
+
+
 
 I then stopped the temporary TCP listener on Windows-Lab.
 
